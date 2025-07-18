@@ -1,0 +1,86 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+}
+
+.twiga-bg {
+  min-height: 100vh;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.twiga-bg.dark-mode {
+  background: linear-gradient(135deg, #181818 0%, #ff9900 100%);
+}
+
+.twiga-bg.light-mode {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffcc80 100%);
+}
+
+.twiga-header {
+  display: flex;
+  align-items: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  letter-spacing: 1px;
+  flex-wrap: wrap;
+}
+
+.twiga-title {
+  color: #ff9900;
+  font-family: 'Segoe UI', 'Arial Black', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.3);
+  margin-right: 0.5rem;
+}
+
+.twiga-catchy {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 400;
+  margin-left: 0.5rem;
+  opacity: 0.9;
+}
+
+.light-mode .twiga-catchy {
+  color: #333;
+}
+
+.twiga-watermark {
+  position: fixed;
+  bottom: 2vw;
+  right: 2vw;
+  color: #ff9900;
+  font-size: 2.5rem;
+  font-family: 'Segoe UI', 'Arial Black', sans-serif;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+}
+
+.main-container {
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .twiga-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .twiga-title {
+    font-size: 1.6rem;
+  }
+  
+  .twiga-catchy {
+    font-size: 0.9rem;
+  }
+}
