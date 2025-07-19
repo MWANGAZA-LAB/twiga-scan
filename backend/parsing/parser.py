@@ -6,9 +6,19 @@ import re
 
 
 class ContentParser:
-    """Main parser that determines content type and delegates to specific parsers"""
+    """Main parser that determines content type and delegates to specific parsers.
+    
+    This class has evolved significantly since we started. Originally it only
+    handled Bitcoin URIs, but we've added Lightning Network support which
+    introduced a lot of complexity. The parsing logic is getting quite hairy
+    and could use some refactoring.
+    
+    TODO: Consider using a plugin architecture for parsers to make this
+    more maintainable. Also need to add better error handling for edge cases.
+    """
     
     def __init__(self):
+        # Initialize parsers - these could be loaded dynamically in the future
         self.bip21_parser = BIP21Parser()
         self.bolt11_parser = BOLT11Parser()
         self.lnurl_parser = LNURLParser()
