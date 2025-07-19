@@ -1,191 +1,223 @@
 import React, { useState, useEffect } from 'react';
 import ScanInput from '../components/ScanInput';
-import ScanResult, { ScanResultData } from '../components/ScanResult';
+import ScanResult from '../components/ScanResult';
+import { apiService, ScanResponse } from '../services/api';
 
-const detectProvider = (data: string): string | undefined => {
-  // Simple Fedi Wallet detection (customize as needed)
-  if (data.includes('fedi') || data.includes('fedimint')) return 'Fedi Wallet';
-  return undefined;
-};
-
-const mockScan = (data: string): ScanResultData => {
-  if (!data) return null as any;
-  if (data.startsWith('bitcoin:')) {
-    return {
-      contentType: 'BIP21',
-      parsed: { address: data.slice(8), amount: '0.01', label: 'Demo' },
-      provider: 'DemoProvider',
-      authStatus: 'Verified',
-      warnings: [],
-    };
-  } else if (data.startsWith('lnbc')) {
-    const provider = detectProvider(data) || 'Unknown';
-    return {
-      contentType: 'BOLT11',
-      parsed: { invoice: data, amount: '0.001', description: 'Lightning Invoice' },
-      provider,
-      authStatus: provider === 'Unknown' ? 'Suspicious' : 'Verified',
-      warnings: provider === 'Unknown' ? ['Unknown provider'] : [],
-    };
-  } else {
-    return {
-      contentType: 'Unknown',
-      parsed: { raw: data },
-      provider: undefined,
-      authStatus: 'Invalid',
-      warnings: ['Unrecognized format'],
-    };
-  }
-};
+interface BitcoinPrice {
+  usd: number;
+  usd_24h_change: number;
+}
 
 const Home: React.FC = () => {
-  const [scanResult, setScanResult] = useState<ScanResultData | null>(null);
-  const [inputData, setInputData] = useState<string>('');
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
-  const [bitcoinPrice, setBitcoinPrice] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const scanName = 'twiga-scan';
+  const [scanResult, setScanResult] = useState<ScanResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [bitcoinPrice, setBitcoinPrice] = useState<BitcoinPrice | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [backendStatus, setBackendStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
 
-  // Fetch Bitcoin price
+  // Check backend connection on mount
   useEffect(() => {
-    const fetchBitcoinPrice = async () => {
-      try {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
-        const data = await response.json();
-        setBitcoinPrice(data.bitcoin.usd);
-      } catch (error) {
-        console.error('Failed to fetch Bitcoin price:', error);
-      }
-    };
+    checkBackendConnection();
     fetchBitcoinPrice();
-    const interval = setInterval(fetchBitcoinPrice, 60000); // Update every minute
-    return () => clearInterval(interval);
   }, []);
 
-  const handleScan = (data: string) => {
-    setInputData(data);
+  const checkBackendConnection = async () => {
+    try {
+      await apiService.healthCheck();
+      setBackendStatus('connected');
+    } catch (error) {
+      console.error('Backend connection failed:', error);
+      setBackendStatus('disconnected');
+    }
+  };
+
+  const fetchBitcoinPrice = async () => {
+    try {
+      const response = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true'
+      );
+      const data = await response.json();
+      setBitcoinPrice(data.bitcoin);
+    } catch (error) {
+      console.error('Failed to fetch Bitcoin price:', error);
+    }
+  };
+
+  const handleScan = async (content: string) => {
+    if (!content.trim()) {
+      setError('Please enter QR code content or URL');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setScanResult(null);
+
+    try {
+      // Generate a simple device ID (in production, this would be more sophisticated)
+      const deviceId = `web-${navigator.userAgent.slice(0, 50)}`;
+      
+      const result = await apiService.scanContent({
+        content: content.trim(),
+        device_id: deviceId,
+        ip_address: '127.0.0.1' // In production, get real IP
+      });
+
+      setScanResult(result);
+    } catch (error) {
+      console.error('Scan failed:', error);
+      setError(error instanceof Error ? error.message : 'Failed to scan content');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleVerify = async () => {
-    if (!inputData.trim()) {
-      alert('Please enter a QR code or URL to verify.');
-      return;
-    }
+    if (!scanResult) return;
     
-    setIsLoading(true);
-    // Simulate API call delay
-    setTimeout(() => {
-      const result = mockScan(inputData);
-      setScanResult(result);
-      setIsLoading(false);
-    }, 1000);
+    try {
+      await apiService.updateScanAction(scanResult.scan_id, {
+        action: 'approved',
+        outcome: 'User verified and approved'
+      });
+      
+      // Update the local state to reflect the action
+      setScanResult(prev => prev ? {
+        ...prev,
+        user_action: 'approved',
+        outcome: 'User verified and approved'
+      } : null);
+      
+    } catch (error) {
+      console.error('Failed to update scan action:', error);
+      setError('Failed to record verification action');
+    }
   };
 
-  const toggleMode = () => {
+  const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle('dark');
   };
 
   return (
-    <div className={`twiga-bg ${isDarkMode ? 'dark-mode' : 'light-mode'}`} style={{ minHeight: '100vh', padding: 20, margin: 0, position: 'relative' }}>
-      <div className="twiga-watermark">{scanName}</div>
-      
-      {/* Main Container */}
-      <div className="main-container" style={{
-        maxWidth: 800,
-        margin: '20px auto',
-        padding: 30,
-        borderRadius: 20,
-        background: isDarkMode ? 'rgba(24, 24, 24, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-        border: `2px solid ${isDarkMode ? '#ff9900' : '#ff6600'}`,
-        backdropFilter: 'blur(10px)',
-      }}>
-        
-        {/* Header with Mode Toggle */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 }}>
-          <h2 className="twiga-header">
-            <span className="twiga-title">twiga-scan™</span>
-            <span className="twiga-catchy">&nbsp;| Bitcoin/Lightning QR & URL Scanner – "Scan with Trust"</span>
-          </h2>
-          <button
-            onClick={toggleMode}
-            style={{
-              background: isDarkMode ? '#ff9900' : '#ff6600',
-              color: isDarkMode ? '#181818' : '#fff',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: 25,
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: 14,
-            }}
-          >
-            {isDarkMode ? '☀️ Light' : '🌙 Dark'}
-          </button>
-        </div>
-
-        {/* Bitcoin Price Display */}
-        {bitcoinPrice && (
-          <div style={{
-            background: isDarkMode ? '#232323' : '#f5f5f5',
-            padding: 15,
-            borderRadius: 12,
-            marginBottom: 20,
-            textAlign: 'center',
-            border: `1px solid ${isDarkMode ? '#ff9900' : '#ff6600'}`,
-          }}>
-            <div style={{ color: isDarkMode ? '#ff9900' : '#ff6600', fontWeight: 600, fontSize: 18 }}>
-              ₿ Bitcoin Price: ${bitcoinPrice.toLocaleString()} USD
+    <div className={`min-h-screen transition-colors duration-300 ${
+      isDarkMode 
+        ? 'bg-gray-900 text-white' 
+        : 'bg-gradient-to-br from-orange-50 to-yellow-50 text-gray-900'
+    }`}>
+      {/* Header */}
+      <header className="container mx-auto px-4 py-6">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <div className="text-3xl font-bold text-orange-600">🦒</div>
+            <div>
+              <h1 className="text-2xl font-bold">Twiga Scan</h1>
+              <p className="text-sm opacity-75">Bitcoin & Lightning Authentication</p>
             </div>
           </div>
-        )}
+          
+          <div className="flex items-center space-x-4">
+            {/* Backend Status */}
+            <div className="flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${
+                backendStatus === 'connected' ? 'bg-green-500' :
+                backendStatus === 'disconnected' ? 'bg-red-500' : 'bg-yellow-500'
+              }`}></div>
+              <span className="text-sm">
+                {backendStatus === 'connected' ? 'Backend Connected' :
+                 backendStatus === 'disconnected' ? 'Backend Disconnected' : 'Checking...'}
+              </span>
+            </div>
 
-        {/* Security Information */}
-        <div style={{
-          background: isDarkMode ? '#1a1a1a' : '#fff3cd',
-          padding: 15,
-          borderRadius: 12,
-          marginBottom: 20,
-          border: `1px solid ${isDarkMode ? '#ff3b3b' : '#ffc107'}`,
-        }}>
-          <h4 style={{ color: isDarkMode ? '#ff3b3b' : '#856404', marginBottom: 10 }}>
-            🔒 Security Notice
-          </h4>
-          <ul style={{ color: isDarkMode ? '#ccc' : '#856404', fontSize: 14, margin: 0, paddingLeft: 20 }}>
-            <li>Always verify the source before making any Bitcoin payments</li>
-            <li>Check the provider and amount carefully</li>
-            <li>Never share your private keys or seed phrases</li>
-            <li>This tool helps verify legitimacy but always double-check</li>
-          </ul>
+            {/* Bitcoin Price */}
+            {bitcoinPrice && (
+              <div className="text-sm">
+                <span className="font-semibold">₿ ${bitcoinPrice.usd.toLocaleString()}</span>
+                <span className={`ml-2 ${
+                  bitcoinPrice.usd_24h_change >= 0 ? 'text-green-500' : 'text-red-500'
+                }`}>
+                  {bitcoinPrice.usd_24h_change >= 0 ? '↗' : '↘'} 
+                  {Math.abs(bitcoinPrice.usd_24h_change).toFixed(2)}%
+                </span>
+              </div>
+            )}
+
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={toggleDarkMode}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'bg-gray-700 hover:bg-gray-600' 
+                  : 'bg-white hover:bg-gray-100 shadow-md'
+              }`}
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
+          </div>
         </div>
+      </header>
 
-        {/* Input Section */}
-        <ScanInput onScan={handleScan} isDarkMode={isDarkMode} />
-        
-        {/* Verify Button */}
-        <div style={{ textAlign: 'center', marginBottom: 20 }}>
-          <button
-            onClick={handleVerify}
-            disabled={isLoading || !inputData.trim()}
-            style={{
-              background: isLoading || !inputData.trim() ? '#666' : '#ff9900',
-              color: '#181818',
-              border: 'none',
-              padding: '12px 30px',
-              borderRadius: 25,
-              cursor: isLoading || !inputData.trim() ? 'not-allowed' : 'pointer',
-              fontWeight: 600,
-              fontSize: 16,
-              minWidth: 120,
-            }}
-          >
-            {isLoading ? '🔍 Verifying...' : '🔍 Verify & Scan'}
-          </button>
+      {/* Main Content */}
+      <main className="container mx-auto px-4 pb-8">
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Scan Input */}
+          <ScanInput onScan={handleScan} isLoading={isLoading} />
+
+          {/* Error Display */}
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
+
+          {/* Scan Result */}
+          {scanResult && (
+            <div className="space-y-4">
+              <ScanResult result={scanResult} />
+              
+              {/* Verify Button */}
+              <div className="flex justify-center">
+                <button
+                  onClick={handleVerify}
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors shadow-lg"
+                >
+                  ✅ Verify & Approve
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Security Information */}
+          <div className={`mt-8 p-6 rounded-lg ${
+            isDarkMode 
+              ? 'bg-gray-800 border border-gray-700' 
+              : 'bg-white border border-gray-200 shadow-lg'
+          }`}>
+            <h3 className="text-lg font-semibold mb-4">🔒 Security Information</h3>
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <h4 className="font-medium mb-2">What we verify:</h4>
+                <ul className="space-y-1 opacity-75">
+                  <li>• Cryptographic signature validity</li>
+                  <li>• Domain and SSL certificate checks</li>
+                  <li>• Known provider identification</li>
+                  <li>• Format and structure validation</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-medium mb-2">Best practices:</h4>
+                <ul className="space-y-1 opacity-75">
+                  <li>• Always verify the amount before sending</li>
+                  <li>• Check the recipient address carefully</li>
+                  <li>• Use trusted wallets and services</li>
+                  <li>• Keep your private keys secure</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-
-        {/* Result Section */}
-        <ScanResult result={scanResult} isDarkMode={isDarkMode} />
-      </div>
+      </main>
     </div>
   );
 };
