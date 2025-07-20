@@ -4,11 +4,13 @@ from fastapi.responses import JSONResponse
 import time
 import structlog
 
-from .api.scan import router as scan_router
-from .api import providers_router, health_router
-from .api.monitoring import router as monitoring_router
-from .models.database import engine, Base
-from .config import settings
+from backend.api.scan import router as scan_router
+from backend.api.providers import router as providers_router
+from backend.api.health import router as health_router
+from backend.api.monitoring import router as monitoring_router
+from backend.auth.api import router as auth_router
+from backend.models.database import engine, Base
+from backend.config import settings
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -101,6 +103,7 @@ app.include_router(scan_router)
 app.include_router(providers_router)
 app.include_router(health_router)
 app.include_router(monitoring_router)
+app.include_router(auth_router, prefix="/auth", tags=["authentication"])
 
 # Health check endpoint
 @app.get("/health")

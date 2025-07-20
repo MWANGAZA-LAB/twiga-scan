@@ -121,10 +121,12 @@ class BIP21Parser:
             return False
         
         # Check for valid characters
-        valid_chars = set('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz')
+        valid_chars = set(
+            '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+        )
         if not all(c in valid_chars for c in address):
             return False
-        
+
         # Basic prefix check (this is simplified)
         if not (address.startswith('1') or address.startswith('3')):
             return False

@@ -37,10 +37,12 @@ class ContentParser:
             - raw_content: Original content
         """
         content = content.strip()
-        
-        # Determine content type and parse accordingly
+        BITCOIN_ADDRESS_REGEX = r'^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$'
         if content.startswith('bitcoin:'):
             return self.bip21_parser.parse(content)
+        elif re.match(BITCOIN_ADDRESS_REGEX, content):
+            # Treat as a Bitcoin URI
+            return self.bip21_parser.parse(f'bitcoin:{content}')
         elif content.startswith('lnbc') or content.startswith('lntb') or content.startswith('lnbcrt'):
             return self.bolt11_parser.parse(content)
         elif content.startswith('LNURL') or self._is_lnurl_url(content):

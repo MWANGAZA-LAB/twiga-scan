@@ -5,9 +5,10 @@ import jsQR from 'jsqr';
 interface ScanInputProps {
   onScan: (content: string) => void;
   isLoading?: boolean;
+  isDarkMode?: boolean;
 }
 
-const ScanInput: React.FC<ScanInputProps> = ({ onScan, isLoading = false }) => {
+const ScanInput: React.FC<ScanInputProps> = ({ onScan, isLoading = false, isDarkMode = false }) => {
   const [inputValue, setInputValue] = useState('');
   const [showCamera, setShowCamera] = useState(false);
   const [showFileUpload, setShowFileUpload] = useState(false);
@@ -71,9 +72,8 @@ const ScanInput: React.FC<ScanInputProps> = ({ onScan, isLoading = false }) => {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Scan QR Code or Enter URL</h2>
-      
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Scan QR Code or Enter URL</h2>
       {/* Input Form */}
       <form onSubmit={handleSubmit} className="mb-6">
         <div className="flex gap-2">
@@ -82,13 +82,17 @@ const ScanInput: React.FC<ScanInputProps> = ({ onScan, isLoading = false }) => {
             value={inputValue}
             onChange={handleInputChange}
             placeholder="Enter Bitcoin URI, Lightning invoice, or URL..."
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            className={`flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg font-mono transition-colors duration-200
+              ${isDarkMode ? 'bg-gray-800 text-white placeholder-gray-400' : 'bg-white text-gray-900'}`}
             disabled={isLoading}
           />
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim()}
-            className="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className={`px-6 py-3 font-semibold rounded-lg transition-colors
+              ${isDarkMode
+                ? 'bg-orange-600 text-white hover:bg-orange-700 disabled:bg-gray-700'
+                : 'bg-orange-600 text-white hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed'}`}
           >
             {isLoading ? '🔍 Scanning...' : '🔍 Scan'}
           </button>
@@ -99,13 +103,19 @@ const ScanInput: React.FC<ScanInputProps> = ({ onScan, isLoading = false }) => {
       <div className="flex gap-4 mb-6">
         <button
           onClick={toggleCamera}
-          className="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+          className={`flex-1 px-4 py-3 font-semibold rounded-lg transition-colors
+            ${isDarkMode
+              ? 'bg-blue-700 text-white hover:bg-blue-800'
+              : 'bg-blue-600 text-white hover:bg-blue-700'}`}
         >
           📷 {showCamera ? 'Close Camera' : 'Open Camera'}
         </button>
         <button
           onClick={toggleFileUpload}
-          className="flex-1 px-4 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+          className={`flex-1 px-4 py-3 font-semibold rounded-lg transition-colors
+            ${isDarkMode
+              ? 'bg-green-700 text-white hover:bg-green-800'
+              : 'bg-green-600 text-white hover:bg-green-700'}`}
         >
           📁 {showFileUpload ? 'Close Upload' : 'Upload QR Image'}
         </button>
@@ -114,14 +124,14 @@ const ScanInput: React.FC<ScanInputProps> = ({ onScan, isLoading = false }) => {
       {/* Camera */}
       {showCamera && (
         <div className="mb-6">
-          <div className="border-2 border-gray-300 rounded-lg overflow-hidden">
+          <div className="border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
             <QrReader
               onResult={handleCameraResult}
               constraints={{ facingMode: 'environment' }}
               className="w-full"
             />
           </div>
-          <p className="text-sm text-gray-600 mt-2 text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 text-center">
             Point your camera at a QR code
           </p>
         </div>
@@ -137,38 +147,22 @@ const ScanInput: React.FC<ScanInputProps> = ({ onScan, isLoading = false }) => {
             onChange={handleFileUpload}
             className="hidden"
           />
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+              className={`px-6 py-3 font-semibold rounded-lg transition-colors
+                ${isDarkMode
+                  ? 'bg-green-700 text-white hover:bg-green-800'
+                  : 'bg-green-600 text-white hover:bg-green-700'}`}
             >
               📁 Select QR Code Image
             </button>
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
               Upload an image containing a QR code
             </p>
           </div>
         </div>
       )}
-
-      {/* Example Inputs */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <h3 className="font-medium text-gray-900 mb-2">💡 Example Inputs:</h3>
-        <div className="grid md:grid-cols-2 gap-2 text-sm">
-          <div>
-            <strong>Bitcoin URI:</strong>
-            <code className="block bg-white p-2 rounded mt-1 text-xs break-all">
-              bitcoin:bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh?amount=0.001
-            </code>
-          </div>
-          <div>
-            <strong>Lightning Address:</strong>
-            <code className="block bg-white p-2 rounded mt-1 text-xs">
-              user@strike.me
-            </code>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

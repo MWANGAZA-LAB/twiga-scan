@@ -1,0 +1,13 @@
+{
+  "name": "twiga-scan",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "concurrently \"npm --prefix frontend start\" \"python run_server.py\""
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^8.2.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11"
+  }
+}

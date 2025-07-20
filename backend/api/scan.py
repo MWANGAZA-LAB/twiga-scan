@@ -4,10 +4,10 @@ from typing import Dict, Any
 import uuid
 from datetime import datetime
 
-from ..models.database import get_db
-from ..models.scan_log import ScanLog, AuthStatus, ContentType
-from ..parsing.parser import ContentParser
-from ..verification.verifier import ContentVerifier
+from backend.models.database import get_db
+from backend.models.scan_log import ScanLog, AuthStatus, ContentType
+from backend.parsing.parser import ContentParser
+from backend.verification.verifier import ContentVerifier
 
 router = APIRouter(prefix="/api/scan", tags=["scan"])
 

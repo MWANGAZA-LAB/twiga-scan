@@ -64,9 +64,9 @@ const ScanResult: React.FC<ScanResultProps> = ({ result }) => {
       case 'BOLT11':
         return (
           <div className="space-y-2">
-            <div><strong>Invoice:</strong> <code className="bg-gray-100 px-2 py-1 rounded text-xs break-all">{data.invoice}</code></div>
-            {data.network && <div><strong>Network:</strong> {data.network}</div>}
-            {data.amount_sats && <div><strong>Amount:</strong> {data.amount_sats} sats</div>}
+            <div><strong>Invoice:</strong> <code className="bg-gray-100 dark:bg-gray-900 dark:text-white px-2 py-1 rounded text-xs break-all">{data.invoice}</code></div>
+            {data.network && <div><strong>Network:</strong> <span className="dark:text-white">{data.network}</span></div>}
+            {data.amount_sats && <div><strong>Amount:</strong> <span className="dark:text-white">{data.amount_sats} sats</span></div>}
           </div>
         );
       
@@ -91,7 +91,7 @@ const ScanResult: React.FC<ScanResultProps> = ({ result }) => {
       default:
         return (
           <div>
-            <pre className="bg-gray-100 p-3 rounded text-sm overflow-x-auto">
+            <pre className="bg-gray-100 dark:bg-gray-900 dark:text-white p-3 rounded text-sm overflow-x-auto">
               {JSON.stringify(data, null, 2)}
             </pre>
           </div>
@@ -129,8 +129,8 @@ const ScanResult: React.FC<ScanResultProps> = ({ result }) => {
 
       {/* Parsed Data */}
       <div className="mb-6">
-        <h4 className="font-medium text-gray-900 mb-2">Parsed Data</h4>
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <h4 className="font-medium text-gray-900 dark:text-white mb-2">Parsed Data</h4>
+        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
           {renderParsedData(result.parsed_data, result.content_type)}
         </div>
       </div>

@@ -1,5 +1,6 @@
 from typing import List, Optional
-from pydantic import BaseSettings, validator
+from pydantic_settings import BaseSettings
+from pydantic import validator
 
 
 class Settings(BaseSettings):
@@ -11,14 +12,14 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     
     # Database
-    DATABASE_URL: str = "sqlite:///./twiga_scan.db"
+    DATABASE_URL: str = "sqlite:///./twiga_scan.db"  # Set in .env for production
     
     # Redis
-    REDIS_URL: Optional[str] = None
+    REDIS_URL: Optional[str] = None  # Set in .env for production
     
     # Security
-    SECRET_KEY: str = "your-secret-key-change-in-production"
-    JWT_SECRET_KEY: str = "your-jwt-secret-key-change-in-production"
+    SECRET_KEY: str = "dev-secret-key-change-in-production"  # Set in .env for production
+    JWT_SECRET_KEY: str = "dev-jwt-secret-key-change-in-production"  # Set in .env for production
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
@@ -44,7 +45,7 @@ class Settings(BaseSettings):
     ALLOWED_FILE_TYPES: List[str] = ["image/jpeg", "image/png", "image/gif"]
     
     # Monitoring
-    SENTRY_DSN: Optional[str] = None
+    SENTRY_DSN: Optional[str] = None  # Set in .env for production
     PROMETHEUS_ENABLED: bool = False
     
     @validator("CORS_ORIGINS", pre=True)

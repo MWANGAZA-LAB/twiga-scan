@@ -57,7 +57,7 @@ class ContentVerifier:
             
             # Determine overall auth status
             verification_results['auth_status'] = self._determine_auth_status(
-                verification_results
+                verification_results, content_type
             )
             
         except Exception as e:
@@ -124,18 +124,18 @@ class ContentVerifier:
                 results['provider_known'] = True
                 results['warnings'].append(f"Known provider: {provider_info['name']}")
     
-    def _determine_auth_status(self, results: Dict) -> str:
+    def _determine_auth_status(self, results: Dict, content_type: str) -> str:
         """Determine overall authentication status"""
         if not results['format_valid']:
             return 'Invalid'
-        
-        # Count positive verifications
+        # For Lightning invoices, if format and crypto are valid, treat as Verified
+        if content_type == 'BOLT11' and results['crypto_valid'] and results['format_valid']:
+            return 'Verified'
         positive_checks = sum([
             results['crypto_valid'],
             results['domain_valid'],
             results['provider_known']
         ])
-        
         if positive_checks >= 2:
             return 'Verified'
         elif positive_checks >= 1:
