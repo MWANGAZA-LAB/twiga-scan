@@ -17,14 +17,12 @@ A minimalist, user-friendly platform for scanning and validating Bitcoin and Lig
 
 ---
 
-## 🖼️ Screenshot
-
 <img width="1218" height="611" alt="minimalist UI" src="https://github.com/user-attachments/assets/198b50b8-11ad-49a2-9e17-e889de7d0c07" />
 
 
 
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Docker & Docker Compose (for production)
@@ -70,7 +68,7 @@ A minimalist, user-friendly platform for scanning and validating Bitcoin and Lig
 
 ---
 
-## 🛠️ How It Works
+## How It Works
 
 1. **Scan a QR code** using your device camera, **upload an image**, or **paste** a payment request.
 2. Click the ➔ arrow to validate.
@@ -78,7 +76,7 @@ A minimalist, user-friendly platform for scanning and validating Bitcoin and Lig
 
 ---
 
-## 📋 API Endpoints (for developers)
+## API Endpoints (for developers)
 
 - `POST /api/scan/` — Scan and validate a QR code or URL
 - `GET /api/scan/` — (Backend) Get scan history (advanced, not in UI)
@@ -91,7 +89,7 @@ See `.env.example` for all environment variables. Most users do not need to chan
 
 ---
 
-## 🛡️ Security & Monitoring
+## Security & Monitoring
 
 - Input validation and backend verification
 - CORS, HTTPS, and secure headers (backend)
@@ -99,7 +97,7 @@ See `.env.example` for all environment variables. Most users do not need to chan
 
 ---
 
-## 🧪 Testing
+## Testing
 
 - **Backend:**
   ```bash
