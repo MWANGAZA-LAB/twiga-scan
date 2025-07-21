@@ -19,9 +19,10 @@ A minimalist, user-friendly platform for scanning and validating Bitcoin and Lig
 
 ## 🖼️ Screenshot
 
-> _Add a screenshot of the minimalist UI here_
+<img width="1218" height="611" alt="minimalist UI" src="https://github.com/user-attachments/assets/198b50b8-11ad-49a2-9e17-e889de7d0c07" />
 
----
+
+
 
 ## 🚀 Quick Start
 
@@ -83,9 +84,6 @@ A minimalist, user-friendly platform for scanning and validating Bitcoin and Lig
 - `GET /api/scan/` — (Backend) Get scan history (advanced, not in UI)
 - `GET /api/providers/` — (Backend) List trusted providers (advanced)
 
-> _Advanced features like scan history, provider registry, analytics, and user accounts are backend-ready and coming soon to the UI._
-
----
 
 ## 🔧 Configuration
 
