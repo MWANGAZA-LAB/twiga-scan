@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
 from sqlalchemy.sql import func
 
-from backend.models.database import Base
+from models.database import Base
 
 
 class User(Base):

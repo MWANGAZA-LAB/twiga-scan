@@ -5,10 +5,10 @@ from typing import Any, Dict
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from backend.models.database import get_db
-from backend.models.scan_log import AuthStatus, ContentType, ScanLog
-from backend.parsing.parser import ContentParser
-from backend.verification.verifier import ContentVerifier
+from models.database import get_db
+from models.scan_log import AuthStatus, ContentType, ScanLog
+from parsing.parser import ContentParser
+from verification.verifier import ContentVerifier
 
 router = APIRouter(prefix="/api/scan", tags=["scan"])
 

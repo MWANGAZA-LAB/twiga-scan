@@ -4,8 +4,8 @@ from typing import Any, Dict, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..models.database import get_db
-from ..models.provider import Provider
+from models.database import get_db
+from models.provider import Provider
 
 router = APIRouter(prefix="/api/providers", tags=["providers"])
 

@@ -6,7 +6,7 @@ from pydantic import BaseModel, HttpUrl
 from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String, Text
 from sqlalchemy.sql import func
 
-from ..models.database import Base
+from models.database import Base
 
 
 class Webhook(Base):

@@ -6,8 +6,8 @@ import psutil
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..config import settings
-from ..models.database import get_db
+from config import settings
+from models.database import get_db
 
 router = APIRouter(prefix="/monitoring", tags=["monitoring"])
 

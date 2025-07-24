@@ -1,3 +1,9 @@
+/* eslint-disable no-restricted-globals */
+/* eslint-disable no-undef */
+
+// Workbox placeholder for build process
+const MANIFEST = self.__WB_MANIFEST || [];
+
 const CACHE_NAME = 'twiga-scan-v1.0.0';
 const STATIC_CACHE = 'twiga-scan-static-v1.0.0';
 const DYNAMIC_CACHE = 'twiga-scan-dynamic-v1.0.0';

@@ -6,7 +6,7 @@ from typing import Optional, Union
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from backend.config import settings
+from config import settings
 
 from .models import TokenData
 

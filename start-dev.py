@@ -22,7 +22,7 @@ def check_requirements():
     
     # Check Node.js
     try:
-        result = subprocess.run(["node", "--version"], capture_output=True, text=True)
+        result = subprocess.run(["node", "--version"], capture_output=True, text=True, shell=True)
         if result.returncode == 0:
             print(f"✅ Node.js available: {result.stdout.strip()}")
         else:
@@ -32,13 +32,23 @@ def check_requirements():
         print("❌ Node.js not found. Install from https://nodejs.org/")
         return False
     
-    # Check npm
+    # Check npm with shell=True for Windows compatibility
     try:
-        result = subprocess.run(["npm", "--version"], capture_output=True, text=True)
+        result = subprocess.run(["npm", "--version"], capture_output=True, text=True, shell=True)
         if result.returncode == 0:
             print(f"✅ npm available: {result.stdout.strip()}")
         else:
-            print("❌ npm not found")
+            print("❌ npm not found - trying alternative methods...")
+            # Try with .cmd extension on Windows
+            if sys.platform == "win32":
+                try:
+                    result = subprocess.run(["npm.cmd", "--version"], capture_output=True, text=True)
+                    if result.returncode == 0:
+                        print(f"✅ npm available: {result.stdout.strip()}")
+                        return True
+                except FileNotFoundError:
+                    pass
+            print("❌ npm not found in PATH")
             return False
     except FileNotFoundError:
         print("❌ npm not found")
@@ -56,7 +66,8 @@ def start_backend():
     else:
         python_path = Path(__file__).parent / ".venv" / "bin" / "python"
     
-    cmd = [str(python_path), "main.py"]
+    # Use the new backend startup wrapper
+    cmd = [str(python_path), "start_backend.py"]
     return subprocess.Popen(cmd, cwd=backend_dir)
 
 def start_frontend():
@@ -67,13 +78,16 @@ def start_frontend():
     # First check if node_modules exists, if not run npm install
     if not (frontend_dir / "node_modules").exists():
         print("📦 Installing frontend dependencies...")
-        install_result = subprocess.run(["npm", "install"], cwd=frontend_dir)
+        # Use shell=True for Windows compatibility
+        install_cmd = ["npm", "install"] if sys.platform != "win32" else ["npm.cmd", "install"]
+        install_result = subprocess.run(install_cmd, cwd=frontend_dir, shell=True)
         if install_result.returncode != 0:
             print("❌ Failed to install frontend dependencies")
             return None
     
-    cmd = ["npm", "start"]
-    return subprocess.Popen(cmd, cwd=frontend_dir)
+    # Use shell=True for Windows compatibility
+    cmd = ["npm", "start"] if sys.platform != "win32" else ["npm.cmd", "start"]
+    return subprocess.Popen(cmd, cwd=frontend_dir, shell=True)
 
 def main():
     """Main function to start both servers"""

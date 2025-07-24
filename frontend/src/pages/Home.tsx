@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { apiService, ScanResponse } from '../services/api';
-import { QrReader } from 'react-qr-reader';
+import Webcam from 'react-webcam';
+import { BrowserQRCodeReader } from '@zxing/library';
 import jsQR from 'jsqr';
 
 const Home: React.FC = () => {
@@ -12,6 +13,40 @@ const Home: React.FC = () => {
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResponse | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const webcamRef = useRef<Webcam>(null);
+  const [isScanning, setIsScanning] = useState(false);
+
+  // QR scanning with webcam
+  const scanQRCode = React.useCallback(async () => {
+    if (webcamRef.current && !isScanning) {
+      setIsScanning(true);
+      try {
+        const screenshot = webcamRef.current.getScreenshot();
+        if (screenshot) {
+          const codeReader = new BrowserQRCodeReader();
+          const result = await codeReader.decodeFromImageUrl(screenshot);
+          if (result) {
+            handleCameraResult({ text: result.getText() });
+          }
+        }
+      } catch (error) {
+        console.log('QR scan error:', error);
+      } finally {
+        setIsScanning(false);
+      }
+    }
+  }, [isScanning]);
+
+  // Auto-scan every 500ms when camera is active
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (showCamera) {
+      interval = setInterval(scanQRCode, 500);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [showCamera, scanQRCode]);
 
   useEffect(() => {
     fetchBitcoinPrice();
@@ -189,15 +224,20 @@ const Home: React.FC = () => {
             {showCamera && (
               <div className="w-full flex flex-col items-center mb-4">
                 <div className="w-full border-2 border-gray-700 rounded-lg overflow-hidden bg-black">
-                  <QrReader
-                    onResult={(result: { text?: string } | null, error: unknown) => {
-                      if (result?.text) handleCameraResult(result);
-                    }}
-                    constraints={{ facingMode: 'environment' }}
+                  <Webcam
+                    ref={webcamRef}
+                    audio={false}
+                    screenshotFormat="image/jpeg"
                     className="w-full"
+                    videoConstraints={{
+                      facingMode: 'environment'
+                    }}
                   />
                 </div>
-                <p className="text-sm text-gray-400 mt-2 text-center">Point your camera at a QR code</p>
+                <p className="text-sm text-gray-400 mt-2 text-center">
+                  Point your camera at a QR code
+                  {isScanning && " (Scanning...)"}
+                </p>
               </div>
             )}
             {showFileUpload && (
