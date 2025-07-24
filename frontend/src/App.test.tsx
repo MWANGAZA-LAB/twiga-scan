@@ -2,8 +2,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('renders Twiga Scan app', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  // Look for the Twiga logo emoji or title
+  const logoElement = screen.getByText(/🦒/);
+  expect(logoElement).toBeInTheDocument();
 });
