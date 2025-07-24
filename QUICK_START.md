@@ -12,6 +12,10 @@ Choose your preferred method:
 
 #### Method 1: Python Script (Recommended)
 ```bash
+# Windows PowerShell
+python start-dev.py
+
+# Command Prompt / Git Bash
 python start-dev.py
 ```
 
@@ -41,6 +45,10 @@ npm start
 - Python script: Press `Ctrl+C`
 - Batch file: Close the terminal windows
 - Manual: Press `Ctrl+C` in each terminal
+
+### 💡 PowerShell Tips
+- Use `;` instead of `&&` for command chaining: `cd backend; python main.py`
+- Or use separate commands on different lines
 
 ---
 
