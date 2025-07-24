@@ -1,7 +1,5 @@
 # 🦒 Twiga Scan™ - Bitcoin/Lightning QR & URL Authentication Platform
 
-> **✅ Auto-Fix Complete!** Backend is 100% operational with all dependencies installed, tests passing, and code quality perfected. Just install Node.js to get the frontend running too!
-
 A minimalist, user-friendly platform for scanning and validating Bitcoin and Lightning Network payment requests, QR codes, and addresses. Instantly check if a payment request is **Valid** or **Invalid** using your camera, file upload, or manual input.
 
 > "Scan smarter, send safer."
@@ -124,7 +122,6 @@ See `.env.example` for all environment variables. Most users do not need to chan
 **Frontend: Pending Node.js** ⚠️
 - React TypeScript application ready
 - QR scanning interface built
-- Just needs Node.js 18+ installation
 
 **Production: Docker Ready** 🐳
 - Kubernetes manifests prepared
