@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
-from typing import Dict, Any
-import psutil
 import time
 from datetime import datetime
+from typing import Any, Dict
 
-from ..models.database import get_db
+import psutil
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
 from ..config import settings
+from ..models.database import get_db
 
 router = APIRouter(prefix="/monitoring", tags=["monitoring"])
 
@@ -18,7 +19,7 @@ async def health_check():
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
         "version": settings.VERSION,
-        "environment": settings.ENVIRONMENT
+        "environment": settings.ENVIRONMENT,
     }
 
 
@@ -31,27 +32,24 @@ async def detailed_health_check(db: Session = Depends(get_db)):
         db_status = "healthy"
     except Exception as e:
         db_status = f"unhealthy: {str(e)}"
-    
+
     # System metrics
     cpu_percent = psutil.cpu_percent(interval=1)
     memory = psutil.virtual_memory()
-    disk = psutil.disk_usage('/')
-    
+    disk = psutil.disk_usage("/")
+
     return {
         "status": "healthy" if db_status == "healthy" else "degraded",
         "timestamp": datetime.utcnow().isoformat(),
         "version": settings.VERSION,
         "environment": settings.ENVIRONMENT,
-        "services": {
-            "database": db_status,
-            "api": "healthy"
-        },
+        "services": {"database": db_status, "api": "healthy"},
         "system": {
             "cpu_percent": cpu_percent,
             "memory_percent": memory.percent,
             "disk_percent": disk.percent,
-            "uptime": time.time() - psutil.boot_time()
-        }
+            "uptime": time.time() - psutil.boot_time(),
+        },
     }
 
 
@@ -60,22 +58,22 @@ async def get_metrics():
     """System metrics endpoint (Prometheus compatible)"""
     cpu_percent = psutil.cpu_percent(interval=1)
     memory = psutil.virtual_memory()
-    disk = psutil.disk_usage('/')
-    
+    disk = psutil.disk_usage("/")
+
     metrics = {
         "twiga_scan_cpu_usage_percent": cpu_percent,
         "twiga_scan_memory_usage_percent": memory.percent,
         "twiga_scan_disk_usage_percent": disk.percent,
         "twiga_scan_memory_available_bytes": memory.available,
         "twiga_scan_disk_free_bytes": disk.free,
-        "twiga_scan_uptime_seconds": time.time() - psutil.boot_time()
+        "twiga_scan_uptime_seconds": time.time() - psutil.boot_time(),
     }
-    
+
     # Format as Prometheus metrics
     prometheus_metrics = []
     for metric_name, value in metrics.items():
         prometheus_metrics.append(f"{metric_name} {value}")
-    
+
     return "\n".join(prometheus_metrics)
 
 
@@ -87,16 +85,20 @@ async def system_status():
             "name": settings.PROJECT_NAME,
             "version": settings.VERSION,
             "environment": settings.ENVIRONMENT,
-            "debug": settings.DEBUG
+            "debug": settings.DEBUG,
         },
         "system": {
             "platform": psutil.sys.platform,
-            "python_version": f"{psutil.sys.version_info.major}.{psutil.sys.version_info.minor}.{psutil.sys.version_info.micro}",
+            "python_version": (
+                f"{psutil.sys.version_info.major}."
+                f"{psutil.sys.version_info.minor}."
+                f"{psutil.sys.version_info.micro}"
+            ),
             "cpu_count": psutil.cpu_count(),
             "memory_total": psutil.virtual_memory().total,
-            "boot_time": datetime.fromtimestamp(psutil.boot_time()).isoformat()
+            "boot_time": datetime.fromtimestamp(psutil.boot_time()).isoformat(),
         },
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
 
@@ -113,13 +115,13 @@ async def application_info():
             "Lightning Network Support",
             "Provider Verification",
             "Scan History",
-            "Real-time Bitcoin Price"
+            "Real-time Bitcoin Price",
         ],
         "api_endpoints": {
             "scan": "/api/scan",
             "providers": "/api/providers",
             "health": "/monitoring/health",
-            "docs": "/docs"
+            "docs": "/docs",
         },
         "configuration": {
             "environment": settings.ENVIRONMENT,
@@ -127,6 +129,6 @@ async def application_info():
             "rate_limit_per_minute": settings.RATE_LIMIT_PER_MINUTE,
             "rate_limit_per_hour": settings.RATE_LIMIT_PER_HOUR,
             "max_file_size": settings.MAX_FILE_SIZE,
-            "allowed_file_types": settings.ALLOWED_FILE_TYPES
-        }
-    } 
+            "allowed_file_types": settings.ALLOWED_FILE_TYPES,
+        },
+    }

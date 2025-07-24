@@ -2,7 +2,11 @@
   "name": "twiga-scan",
   "version": "1.0.0",
   "scripts": {
-    "start": "concurrently \"npm --prefix frontend start\" \"python run_server.py\""
+    "dev": "concurrently \"npm --prefix backend run dev\" \"npm --prefix frontend start\"",
+    "start:backend": "cd backend && python main.py",
+    "start:frontend": "cd frontend && npm start",
+    "start:both": "python start-dev.py",
+    "install:all": "cd backend && pip install -r requirements.txt && cd ../frontend && npm install"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

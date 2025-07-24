@@ -1,16 +1,17 @@
+import time
+
+import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import time
-import structlog
 
-from backend.api.scan import router as scan_router
-from backend.api.providers import router as providers_router
-from backend.api.health import router as health_router
-from backend.api.monitoring import router as monitoring_router
-from backend.auth.api import router as auth_router
-from backend.models.database import engine, Base
-from backend.config import settings
+from api.health import router as health_router
+from api.monitoring import router as monitoring_router
+from api.providers import router as providers_router
+from api.scan import router as scan_router
+from auth.api import router as auth_router
+from config import settings
+from models.database import Base, engine
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -26,7 +27,7 @@ structlog.configure(
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
         structlog.processors.UnicodeDecoder(),
-        structlog.processors.JSONRenderer()
+        structlog.processors.JSONRenderer(),
     ],
     context_class=dict,
     logger_factory=structlog.stdlib.LoggerFactory(),
@@ -42,7 +43,7 @@ app = FastAPI(
     description="Bitcoin/Lightning QR & URL Authentication Platform",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
 )
 
 # Add CORS middleware
@@ -54,22 +55,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Add request logging middleware
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()
-    
+
     # Log request
     logger.info(
         "Request started",
         method=request.method,
         url=str(request.url),
         client_ip=request.client.host if request.client else None,
-        user_agent=request.headers.get("user-agent")
+        user_agent=request.headers.get("user-agent"),
     )
-    
+
     response = await call_next(request)
-    
+
     # Log response
     process_time = time.time() - start_time
     logger.info(
@@ -77,10 +79,11 @@ async def log_requests(request: Request, call_next):
         method=request.method,
         url=str(request.url),
         status_code=response.status_code,
-        process_time=process_time
+        process_time=process_time,
     )
-    
+
     return response
+
 
 # Add exception handler
 @app.exception_handler(Exception)
@@ -90,13 +93,11 @@ async def global_exception_handler(request: Request, exc: Exception):
         method=request.method,
         url=str(request.url),
         error=str(exc),
-        exc_info=True
+        exc_info=True,
     )
-    
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Internal server error"}
-    )
+
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+
 
 # Include routers
 app.include_router(scan_router)
@@ -105,14 +106,12 @@ app.include_router(health_router)
 app.include_router(monitoring_router)
 app.include_router(auth_router, prefix="/auth", tags=["authentication"])
 
+
 # Health check endpoint
 @app.get("/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "timestamp": time.time(),
-        "service": "twiga-scan-api"
-    }
+    return {"status": "healthy", "timestamp": time.time(), "service": "twiga-scan-api"}
+
 
 # Root endpoint
 @app.get("/")
@@ -121,9 +120,11 @@ async def root():
         "message": "Twiga Scan API",
         "version": "1.0.0",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
     }
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)

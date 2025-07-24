@@ -1,17 +1,19 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, JSON
-from sqlalchemy.sql import func
-from pydantic import BaseModel, HttpUrl
-from typing import List, Optional, Dict, Any
-from datetime import datetime
 import json
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, HttpUrl
+from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy.sql import func
 
 from ..models.database import Base
 
 
 class Webhook(Base):
     """Webhook configuration model"""
+
     __tablename__ = "webhooks"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, nullable=False)
     name = Column(String, nullable=False)
@@ -28,8 +30,9 @@ class Webhook(Base):
 
 class WebhookDelivery(Base):
     """Webhook delivery log"""
+
     __tablename__ = "webhook_deliveries"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     webhook_id = Column(Integer, nullable=False)
     event_type = Column(String, nullable=False)
@@ -66,7 +69,7 @@ class WebhookResponse(BaseModel):
     retry_count: int
     last_delivery: Optional[datetime] = None
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -80,7 +83,7 @@ class WebhookDeliveryResponse(BaseModel):
     success: bool
     delivery_time: datetime
     error_message: Optional[str] = None
-    
+
     class Config:
         from_attributes = True
 
@@ -101,11 +104,12 @@ WEBHOOK_EVENTS = {
 
 class WebhookPayload(BaseModel):
     """Standard webhook payload format"""
+
     event: str
     timestamp: datetime
     data: Dict[str, Any]
     webhook_id: int
-    
+
     def to_json(self) -> str:
         """Convert payload to JSON string"""
-        return json.dumps(self.dict(), default=str) 
+        return json.dumps(self.dict(), default=str)

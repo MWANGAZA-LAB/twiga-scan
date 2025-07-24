@@ -1,7 +1,9 @@
-from sqlalchemy import Column, String, DateTime, Text, JSON, Enum, Integer
-from sqlalchemy.sql import func
-from .database import Base
 import enum
+
+from sqlalchemy import JSON, Column, DateTime, Enum, Integer, String, Text
+from sqlalchemy.sql import func
+
+from .database import Base
 
 
 class AuthStatus(str, enum.Enum):
@@ -35,4 +37,4 @@ class ScanLog(Base):
     outcome = Column(String(255), nullable=True)
     device_id = Column(String(255), nullable=True)
     ip_address = Column(String(45), nullable=True)  # IPv6 compatible
-    user_agent = Column(Text, nullable=True) 
+    user_agent = Column(Text, nullable=True)

@@ -40,4 +40,4 @@ class DomainChecker:
         # Check if domain is suspicious
         suspicious_patterns = ["phish", "scam", "fraud"]
         domain_lower = domain.lower()
-        return any(pattern in domain_lower for pattern in suspicious_patterns) 
+        return any(pattern in domain_lower for pattern in suspicious_patterns)

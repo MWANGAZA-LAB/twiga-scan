@@ -1,16 +1,18 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
-from sqlalchemy.sql import func
-from pydantic import BaseModel, EmailStr
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, EmailStr
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy.sql import func
 
 from backend.models.database import Base
 
 
 class User(Base):
     """User model for authentication and access control"""
+
     __tablename__ = "users"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
@@ -26,8 +28,9 @@ class User(Base):
 
 class APIKey(Base):
     """API Key model for programmatic access"""
+
     __tablename__ = "api_keys"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, nullable=False)
     key_name = Column(String, nullable=False)
@@ -62,7 +65,7 @@ class UserResponse(BaseModel):
     is_active: bool
     is_superuser: bool
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -94,6 +97,6 @@ class APIKeyResponse(BaseModel):
     created_at: datetime
     last_used: Optional[datetime] = None
     expires_at: Optional[datetime] = None
-    
+
     class Config:
-        from_attributes = True 
+        from_attributes = True

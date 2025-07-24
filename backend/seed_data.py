@@ -5,11 +5,12 @@ Populates initial providers and test data
 """
 
 import asyncio
-from models.database import SessionLocal, engine, Base
-from models.provider import Provider
-from models.scan_log import ScanLog, AuthStatus, ContentType
-from datetime import datetime, timedelta
 import uuid
+from datetime import datetime, timedelta
+
+from models.database import Base, SessionLocal, engine
+from models.provider import Provider
+from models.scan_log import AuthStatus, ContentType, ScanLog
 
 
 def seed_providers():
@@ -21,7 +22,7 @@ def seed_providers():
         if existing_count > 0:
             print(f"✅ {existing_count} providers already exist, skipping seed")
             return
-        
+
         # Initial providers
         providers = [
             {
@@ -33,8 +34,8 @@ def seed_providers():
                 "provider_metadata": {
                     "description": "Official Bitcoin Core development funding",
                     "website": "https://bitcoincore.org",
-                    "verified": True
-                }
+                    "verified": True,
+                },
             },
             {
                 "name": "Strike",
@@ -45,8 +46,8 @@ def seed_providers():
                 "provider_metadata": {
                     "description": "Lightning Network payment provider",
                     "website": "https://strike.me",
-                    "verified": True
-                }
+                    "verified": True,
+                },
             },
             {
                 "name": "Lightning Labs",
@@ -57,8 +58,8 @@ def seed_providers():
                 "provider_metadata": {
                     "description": "Lightning Network development company",
                     "website": "https://lightning.engineering",
-                    "verified": True
-                }
+                    "verified": True,
+                },
             },
             {
                 "name": "Fedi Wallet",
@@ -69,8 +70,8 @@ def seed_providers():
                 "provider_metadata": {
                     "description": "Bitcoin and Lightning wallet",
                     "website": "https://fedi.org",
-                    "verified": True
-                }
+                    "verified": True,
+                },
             },
             {
                 "name": "BTCPay Server",
@@ -81,18 +82,18 @@ def seed_providers():
                 "provider_metadata": {
                     "description": "Open-source Bitcoin payment processor",
                     "website": "https://btcpayserver.org",
-                    "verified": True
-                }
-            }
+                    "verified": True,
+                },
+            },
         ]
-        
+
         for provider_data in providers:
             provider = Provider(**provider_data)
             db.add(provider)
-        
+
         db.commit()
         print(f"✅ Seeded {len(providers)} providers")
-        
+
     except Exception as e:
         print(f"❌ Error seeding providers: {e}")
         db.rollback()
@@ -109,17 +110,20 @@ def seed_test_scans():
         if existing_count > 0:
             print(f"✅ {existing_count} scan logs already exist, skipping seed")
             return
-        
+
         # Test scan data
         test_scans = [
             {
                 "scan_id": str(uuid.uuid4()),
-                "raw_content": "bitcoin:bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh?amount=0.001&label=test",
+                "raw_content": (
+                    "bitcoin:bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+                    "?amount=0.001&label=test"
+                ),
                 "content_type": ContentType.BIP21,
                 "parsed_data": {
                     "address": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
                     "amount": 0.001,
-                    "label": "test"
+                    "label": "test",
                 },
                 "auth_status": AuthStatus.VERIFIED,
                 "verification_results": {
@@ -128,12 +132,12 @@ def seed_test_scans():
                     "domain_valid": False,
                     "provider_known": True,
                     "warnings": ["Known provider: Bitcoin Core Development Fund"],
-                    "auth_status": "Verified"
+                    "auth_status": "Verified",
                 },
                 "warnings": ["Known provider: Bitcoin Core Development Fund"],
                 "user_action": "approved",
                 "outcome": "Payment sent successfully",
-                "timestamp": datetime.utcnow() - timedelta(hours=2)
+                "timestamp": datetime.utcnow() - timedelta(hours=2),
             },
             {
                 "scan_id": str(uuid.uuid4()),
@@ -142,7 +146,7 @@ def seed_test_scans():
                 "parsed_data": {
                     "url": "https://strike.me/lnurlp/user123",
                     "domain": "strike.me",
-                    "type": "payRequest"
+                    "type": "payRequest",
                 },
                 "auth_status": AuthStatus.VERIFIED,
                 "verification_results": {
@@ -151,12 +155,12 @@ def seed_test_scans():
                     "domain_valid": True,
                     "provider_known": True,
                     "warnings": ["Known provider: Strike"],
-                    "auth_status": "Verified"
+                    "auth_status": "Verified",
                 },
                 "warnings": ["Known provider: Strike"],
                 "user_action": "approved",
                 "outcome": "Lightning payment sent",
-                "timestamp": datetime.utcnow() - timedelta(hours=1)
+                "timestamp": datetime.utcnow() - timedelta(hours=1),
             },
             {
                 "scan_id": str(uuid.uuid4()),
@@ -166,7 +170,7 @@ def seed_test_scans():
                     "lightning_address": "user@strike.me",
                     "username": "user",
                     "domain": "strike.me",
-                    "lnurl_url": "https://strike.me/.well-known/lnurlp/user"
+                    "lnurl_url": "https://strike.me/.well-known/lnurlp/user",
                 },
                 "auth_status": AuthStatus.SUSPICIOUS,
                 "verification_results": {
@@ -175,22 +179,22 @@ def seed_test_scans():
                     "domain_valid": True,
                     "provider_known": False,
                     "warnings": ["Unknown user account"],
-                    "auth_status": "Suspicious"
+                    "auth_status": "Suspicious",
                 },
                 "warnings": ["Unknown user account"],
                 "user_action": "aborted",
                 "outcome": "User cancelled payment",
-                "timestamp": datetime.utcnow() - timedelta(minutes=30)
-            }
+                "timestamp": datetime.utcnow() - timedelta(minutes=30),
+            },
         ]
-        
+
         for scan_data in test_scans:
             scan_log = ScanLog(**scan_data)
             db.add(scan_log)
-        
+
         db.commit()
         print(f"✅ Seeded {len(test_scans)} test scan logs")
-        
+
     except Exception as e:
         print(f"❌ Error seeding scan logs: {e}")
         db.rollback()
@@ -201,17 +205,17 @@ def seed_test_scans():
 def main():
     """Main seeding function"""
     print("🌱 Starting database seeding...")
-    
+
     # Create tables if they don't exist
     Base.metadata.create_all(bind=engine)
     print("✅ Database tables created/verified")
-    
+
     # Seed data
     seed_providers()
     seed_test_scans()
-    
+
     print("🎉 Database seeding completed!")
 
 
 if __name__ == "__main__":
-    main() 
+    main()
