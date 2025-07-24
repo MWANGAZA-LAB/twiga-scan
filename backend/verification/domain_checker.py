@@ -29,6 +29,7 @@ class DomainChecker:
     async def _check_ssl(self, domain: str) -> bool:
         # Check SSL certificate
         context = ssl.create_default_context()
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
         try:
             with socket.create_connection((domain, 443), timeout=10) as sock:
                 with context.wrap_socket(sock, server_hostname=domain):
