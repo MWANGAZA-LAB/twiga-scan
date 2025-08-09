@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { QrReader } from 'react-qr-reader';
+import { QrReader } from '@uides/react-qr-reader';
 import jsQR from 'jsqr';
 
 interface ScanInputProps {
@@ -26,9 +26,9 @@ const ScanInput: React.FC<ScanInputProps> = ({ onScan, isLoading = false, isDark
   };
 
   const handleCameraResult = (result: any) => {
-    if (result) {
+    if (result && result.text) {
       setShowCamera(false);
-      onScan(result?.text || '');
+      onScan(result.text);
     }
   };
 

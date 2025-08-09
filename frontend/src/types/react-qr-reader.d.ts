@@ -1,4 +1,4 @@
-declare module 'react-qr-reader' {
+declare module '@uides/react-qr-reader' {
   import React from 'react';
 
   interface QrReaderProps {
