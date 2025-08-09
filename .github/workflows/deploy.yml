@@ -21,12 +21,11 @@ jobs:
   deploy-staging:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
-    environment: 
+    environment:
       name: staging
     permissions:
       contents: read
       packages: write
-    
     steps:
     - uses: actions/checkout@v4
     
