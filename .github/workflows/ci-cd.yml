@@ -9,6 +9,12 @@ on:
 env:
   REGISTRY: ghcr.io
 
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+  actions: read
+
 jobs:
   # Backend Testing
   backend-test:
@@ -139,6 +145,10 @@ jobs:
   security-scan:
     runs-on: ubuntu-latest
     needs: [backend-test, frontend-test]
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     
     steps:
     - uses: actions/checkout@v4
