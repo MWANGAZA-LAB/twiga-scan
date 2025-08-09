@@ -20,8 +20,8 @@ async def test_parsing():
 
     # Test cases
     test_cases = [
-        "bitcoin:bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
-        "?amount=0.001&label=test",
+        ("bitcoin:bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+         "?amount=0.001&label=test"),
         "lnbc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
         "https://strike.me/lnurlp/user123",
         "user@strike.me",
