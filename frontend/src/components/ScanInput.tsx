@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { QrReader } from '@uides/react-qr-reader';
+import CustomQrReader from './CustomQrReader';
 import jsQR from 'jsqr';
 
 interface ScanInputProps {
@@ -125,9 +125,9 @@ const ScanInput: React.FC<ScanInputProps> = ({ onScan, isLoading = false, isDark
       {showCamera && (
         <div className="mb-6">
           <div className="border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-            <QrReader
+            <CustomQrReader
               onResult={handleCameraResult}
-              constraints={{ facingMode: 'environment' }}
+              onError={(err) => console.error('Camera error:', err)}
               className="w-full"
             />
           </div>
