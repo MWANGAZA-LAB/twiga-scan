@@ -4,6 +4,10 @@ A minimalist, user-friendly platform for scanning and validating Bitcoin and Lig
 
 > "Scan smarter, send safer."
 
+## 🌐 Live Demo
+
+**Try it now:** [https://mwangaza-lab.github.io/twiga-scan/](https://mwangaza-lab.github.io/twiga-scan/)
+
 ---
 
 ## ✨ Features
@@ -23,6 +27,8 @@ A minimalist, user-friendly platform for scanning and validating Bitcoin and Lig
 
 
 ## Quick Start
+
+**🚀 Live Application:** [https://mwangaza-lab.github.io/twiga-scan/](https://mwangaza-lab.github.io/twiga-scan/)
 
 ### Prerequisites
 - **Python 3.11+** ✅ (Ready - virtual environment configured)
