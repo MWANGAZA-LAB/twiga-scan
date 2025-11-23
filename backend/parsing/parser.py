@@ -1,32 +1,38 @@
+import logging
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from .bip21_parser import BIP21Parser
 from .bolt11_parser import BOLT11Parser
 from .lnurl_parser import LNURLParser
 
+logger = logging.getLogger(__name__)
+
 
 class ContentParser:
     """Main parser that determines content type and delegates to specific parsers.
 
-    This class has evolved significantly since we started. Originally it only
-    handled Bitcoin URIs, but we've added Lightning Network support which
-    introduced a lot of complexity. The parsing logic is getting quite hairy
-    and could use some refactoring.
-
-    TODO: Consider using a plugin architecture for parsers to make this
-    more maintainable. Also need to add better error handling for edge cases.
+    Handles multiple Bitcoin and Lightning Network payment formats:
+    - BIP21 Bitcoin URIs and addresses
+    - BOLT11 Lightning invoices
+    - LNURL payment requests
+    - Lightning addresses
     """
 
+    MAX_CONTENT_LENGTH = 10000  # 10KB max input size
+    BITCOIN_ADDRESS_REGEX = r"^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$"
+
     def __init__(self):
-        # Initialize parsers - these could be loaded dynamically in the future
         self.bip21_parser = BIP21Parser()
         self.bolt11_parser = BOLT11Parser()
         self.lnurl_parser = LNURLParser()
+        logger.info(
+            "ContentParser initialized with all payment format parsers"
+        )
 
     def parse(self, content: str) -> Dict[str, Any]:
         """
-        Parse content and return structured data
+        Parse content and return structured data with comprehensive validation.
 
         Args:
             content: Raw content string (QR code, URL, etc.)
@@ -36,30 +42,68 @@ class ContentParser:
             - content_type: Type of content (BIP21, BOLT11, LNURL, etc.)
             - parsed_data: Structured parsed data
             - raw_content: Original content
+
+        Raises:
+            ValueError: If content is empty, too large, or contains
+                invalid characters
         """
+        if not content:
+            raise ValueError("Content cannot be empty")
+
         content = content.strip()
-        BITCOIN_ADDRESS_REGEX = r"^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$"
-        if content.startswith("bitcoin:"):
-            return self.bip21_parser.parse(content)
-        elif re.match(BITCOIN_ADDRESS_REGEX, content):
-            # Treat as a Bitcoin URI
-            return self.bip21_parser.parse(f"bitcoin:{content}")
-        elif (
-            content.startswith("lnbc")
-            or content.startswith("lntb")
-            or content.startswith("lnbcrt")
-        ):
-            return self.bolt11_parser.parse(content)
-        elif content.startswith("LNURL") or self._is_lnurl_url(content):
-            return self.lnurl_parser.parse(content)
-        elif self._is_lightning_address(content):
-            return self.lnurl_parser.parse_lightning_address(content)
-        else:
-            return {
-                "content_type": "UNKNOWN",
-                "parsed_data": {"raw": content},
-                "raw_content": content,
-            }
+        
+        # Check again after stripping
+        if not content:
+            raise ValueError("Content cannot be empty")
+
+        # Validate content length to prevent DoS
+        if len(content) > self.MAX_CONTENT_LENGTH:
+            raise ValueError(
+                f"Content too large: {len(content)} bytes "
+                f"(max {self.MAX_CONTENT_LENGTH})"
+            )
+
+        logger.debug(
+            "Parsing content of length %d, type detection starting",
+            len(content)
+        )
+
+        try:
+            # Detect and parse based on content type (case-insensitive prefix)
+            if content.lower().startswith("bitcoin:"):
+                logger.debug("Detected BIP21 Bitcoin URI")
+                # Normalize only the prefix to lowercase,
+                # keep address case-sensitive
+                if not content.startswith("bitcoin:"):
+                    content = "bitcoin:" + content.split(":", 1)[1]
+                return self.bip21_parser.parse(content)
+            elif re.match(self.BITCOIN_ADDRESS_REGEX, content):
+                logger.debug("Detected standalone Bitcoin address")
+                return self.bip21_parser.parse(f"bitcoin:{content}")
+            elif content.startswith(("lnbc", "lntb", "lnbcrt")):
+                logger.debug("Detected BOLT11 Lightning invoice")
+                return self.bolt11_parser.parse(content)
+            elif content.startswith("LNURL") or self._is_lnurl_url(content):
+                logger.debug("Detected LNURL payment request")
+                return self.lnurl_parser.parse(content)
+            elif self._is_lightning_address(content):
+                logger.debug("Detected Lightning address")
+                return self.lnurl_parser.parse_lightning_address(content)
+            else:
+                logger.warning(
+                    "Unknown content type for input: %s...", content[:50]
+                )
+                return {
+                    "content_type": "UNKNOWN",
+                    "parsed_data": {
+                        "raw": content,
+                        "error": "Unrecognized payment format",
+                    },
+                    "raw_content": content,
+                }
+        except Exception as e:
+            logger.error("Parse error: %s", str(e), exc_info=True)
+            raise
 
     def _is_lnurl_url(self, content: str) -> bool:
         """Check if content is an LNURL HTTPS URL"""

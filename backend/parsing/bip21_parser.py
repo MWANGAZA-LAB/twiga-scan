@@ -19,9 +19,11 @@ class BIP21Parser:
     """
 
     def __init__(self):
-        # Basic Bitcoin URI pattern - this has been refined over time
-        # to handle various edge cases we've encountered
-        self.uri_pattern = r"^bitcoin:([13][a-km-zA-HJ-NP-Z1-9]{25,34})(\?.*)?$"
+        # Enhanced Bitcoin URI pattern supporting all address types:
+        # - Legacy (P2PKH): starts with 1
+        # - P2SH: starts with 3
+        # - SegWit (Bech32): starts with bc1
+        self.uri_pattern = r"^bitcoin:([13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[a-z0-9]{39,87})(\?.*)?$"
 
     def parse(self, content: str) -> Dict[str, Any]:
         """
@@ -99,14 +101,12 @@ class BIP21Parser:
 
     def _is_valid_bitcoin_address(self, address: str) -> bool:
         """
-        Basic Bitcoin address validation.
+        Bitcoin address validation supporting all address types.
 
-        This is a simplified validation - in production you'd want to use
-        a proper Bitcoin library for address validation and checksum verification.
-
-        TODO: Replace with proper Bitcoin address validation library
-        TODO: Add support for Bech32 addresses (native SegWit)
-        TODO: Add support for P2SH addresses
+        This validates:
+        - Legacy P2PKH addresses (starts with 1)
+        - P2SH addresses (starts with 3)
+        - SegWit Bech32 addresses (starts with bc1)
 
         Args:
             address: Bitcoin address to validate
@@ -114,21 +114,33 @@ class BIP21Parser:
         Returns:
             True if address format appears valid
         """
-        # Basic format check - this is not comprehensive
-        # We should really use a proper Bitcoin library here
         if not address:
             return False
 
-        # Check length and character set
+        # Check for Bech32 (SegWit) addresses
+        if address.startswith("bc1"):
+            # Bech32 addresses are lowercase and 42-62 characters
+            if len(address) < 42 or len(address) > 90:
+                return False
+            # Bech32 character set (excludes 1, b, i, o)
+            bech32_chars = set("023456789acdefghjklmnpqrstuvwxyz")
+            # Skip the "bc1" prefix when checking characters
+            if not all(c in bech32_chars for c in address[3:]):
+                return False
+            return True
+
+        # Check for legacy and P2SH addresses
         if len(address) < 26 or len(address) > 35:
             return False
 
-        # Check for valid characters
-        valid_chars = set("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
+        # Check for valid Base58 characters
+        valid_chars = set(
+            "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+        )
         if not all(c in valid_chars for c in address):
             return False
 
-        # Basic prefix check (this is simplified)
+        # Check prefix (1 for P2PKH, 3 for P2SH)
         if not (address.startswith("1") or address.startswith("3")):
             return False
 

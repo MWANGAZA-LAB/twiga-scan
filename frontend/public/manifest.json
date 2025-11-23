@@ -12,120 +12,19 @@
   "categories": ["finance", "utilities", "productivity"],
   "icons": [
     {
-      "src": "/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
     },
     {
-      "src": "/icons/icon-96x96.png",
-      "sizes": "96x96",
+      "src": "/logo192.png",
       "type": "image/png",
-      "purpose": "maskable any"
+      "sizes": "192x192"
     },
     {
-      "src": "/icons/icon-128x128.png",
-      "sizes": "128x128",
+      "src": "/logo512.png",
       "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Scan QR Code",
-      "short_name": "Scan",
-      "description": "Quickly scan a QR code",
-      "url": "/?action=scan",
-      "icons": [
-        {
-          "src": "/icons/scan-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Scan History",
-      "short_name": "History",
-      "description": "View scan history",
-      "url": "/?action=history",
-      "icons": [
-        {
-          "src": "/icons/history-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Manual Entry",
-      "short_name": "Manual",
-      "description": "Enter payment URI manually",
-      "url": "/?action=manual",
-      "icons": [
-        {
-          "src": "/icons/manual-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop-light.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Twiga Scan Desktop Light Mode"
-    },
-    {
-      "src": "/screenshots/desktop-dark.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Twiga Scan Desktop Dark Mode"
-    },
-    {
-      "src": "/screenshots/mobile-light.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Twiga Scan Mobile Light Mode"
-    },
-    {
-      "src": "/screenshots/mobile-dark.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Twiga Scan Mobile Dark Mode"
+      "sizes": "512x512"
     }
   ],
   "related_applications": [],

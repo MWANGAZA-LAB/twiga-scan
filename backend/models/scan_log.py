@@ -16,8 +16,8 @@ class ContentType(str, enum.Enum):
     BIP21 = "BIP21"
     BOLT11 = "BOLT11"
     LNURL = "LNURL"
-    LIGHTNING_ADDRESS = "LightningAddress"
-    UNKNOWN = "Unknown"
+    LIGHTNING_ADDRESS = "LIGHTNING_ADDRESS"
+    UNKNOWN = "UNKNOWN"
 
 
 class ScanLog(Base):
@@ -38,3 +38,12 @@ class ScanLog(Base):
     device_id = Column(String(255), nullable=True)
     ip_address = Column(String(45), nullable=True)  # IPv6 compatible
     user_agent = Column(Text, nullable=True)
+    normalized_identifier = Column(
+        String(500), index=True, nullable=True
+    )  # Normalized address/invoice for duplicate detection
+    first_seen = Column(
+        DateTime(timezone=True), nullable=True
+    )  # First time this identifier was seen
+    usage_count = Column(
+        Integer, default=1, nullable=False
+    )  # Number of times scanned

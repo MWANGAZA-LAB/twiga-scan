@@ -1,9 +1,12 @@
+import logging
 import re
 from typing import Any, Dict, Optional
 
+logger = logging.getLogger(__name__)
+
 
 class ProviderChecker:
-    """Check if content is from known service providers"""
+    """Check if content is from known and trusted service providers."""
 
     def __init__(self):
         # Known providers database (in production, this would be in a database)
@@ -73,7 +76,7 @@ class ProviderChecker:
 
     async def check_domain(self, url: str) -> Optional[Dict[str, Any]]:
         """
-        Check if domain is from a known provider
+        Check if domain is from a known provider.
 
         Args:
             url: URL to check
@@ -81,24 +84,39 @@ class ProviderChecker:
         Returns:
             Provider info if known, None otherwise
         """
+        if not url or not isinstance(url, str):
+            logger.warning("Invalid URL provided to check_domain")
+            return None
+
         try:
             from urllib.parse import urlparse
 
             parsed_url = urlparse(url)
             domain = parsed_url.netloc.lower()
 
+            if not domain:
+                logger.debug(f"No domain found in URL: {url}")
+                return None
+
             # Check exact domain match
             if domain in self.known_providers["domains"]:
+                logger.info(f"Matched known provider: {domain}")
                 return self.known_providers["domains"][domain]
 
             # Check subdomain matches
             for known_domain, provider_info in self.known_providers["domains"].items():
                 if domain.endswith("." + known_domain) or domain == known_domain:
+                    logger.info(f"Matched known provider subdomain: {domain} -> {known_domain}")
                     return provider_info
 
+            logger.debug(f"No known provider match for domain: {domain}")
             return None
 
-        except Exception:
+        except ValueError as e:
+            logger.error(f"Invalid URL format: {url}, error: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error checking domain: {e}", exc_info=True)
             return None
 
     async def check_pubkey(self, pubkey: str) -> Optional[Dict[str, Any]]:

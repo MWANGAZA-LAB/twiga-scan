@@ -67,12 +67,13 @@ class BOLT11Parser:
 
     def _get_network(self, invoice: str) -> str:
         """Get network from human-readable part"""
-        if invoice.startswith("lnbc"):
+        # Check longer prefixes first to avoid false matches
+        if invoice.startswith("lnbcrt"):
+            return "regtest"
+        elif invoice.startswith("lnbc"):
             return "mainnet"
         elif invoice.startswith("lntb"):
             return "testnet"
-        elif invoice.startswith("lnbcrt"):
-            return "regtest"
         else:
             return "unknown"
 

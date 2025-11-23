@@ -1,6 +1,7 @@
 // API service for backend communication
 
-const API_BASE_URL = 'http://localhost:8000/api';
+// Use environment variable for API URL, fallback to localhost for development
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 export interface ScanRequest {
   content: string;
@@ -19,6 +20,10 @@ export interface ScanResponse {
   verification_results: any;
   user_action?: string;
   outcome?: string;
+  // Duplicate detection fields
+  is_duplicate?: boolean;
+  usage_count?: number;
+  first_seen?: string;
 }
 
 export interface ScanHistoryResponse {
