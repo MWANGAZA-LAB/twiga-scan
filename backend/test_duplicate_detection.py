@@ -4,27 +4,45 @@ Test duplicate detection functionality for lightning addresses and other payment
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import delete
 
 from main import app
 from models.database import SessionLocal
 from models.scan_log import ScanLog
 
+# Use a single client instance to maintain database state
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def clean_database():
+    """Clear scan_logs table before each test."""
+    # Clear all scan logs to ensure clean state
+    db = SessionLocal()
+    try:
+        # Delete all records
+        db.query(ScanLog).delete()
+        db.commit()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
+    
+    # Yield control back to test
+    yield
+    
+    # Cleanup after test
+    db = SessionLocal()
+    try:
+        db.query(ScanLog).delete()
+        db.commit()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
 
 
 class TestDuplicateDetection:
     """Test duplicate detection for various payment types."""
-
-    def setup_method(self):
-        """Clear scan_logs table before each test."""
-        # Clear all scan logs to ensure clean state
-        db = SessionLocal()
-        try:
-            db.execute(delete(ScanLog))
-            db.commit()
-        finally:
-            db.close()
 
     def test_lightning_address_duplicate_detection(self):
         """Test that scanning the same Lightning address twice triggers duplicate warning."""
