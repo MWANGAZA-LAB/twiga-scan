@@ -30,7 +30,10 @@ const Home: React.FC = () => {
           }
         }
       } catch (error) {
-        console.log('QR scan error:', error);
+        // Silently handle QR scan errors (common with bad codes)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('QR scan error:', error);
+        }
       } finally {
         setIsScanning(false);
       }

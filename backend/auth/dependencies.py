@@ -58,18 +58,25 @@ def get_current_superuser(current_user: User = Depends(get_current_user)) -> Use
 
 def get_user_by_api_key(api_key: str, db: Session = Depends(get_db)) -> Optional[User]:
     """Get user by API key"""
+    from .jwt_handler import verify_api_key
+    
     # Check if it's a valid API key format
     if not api_key.startswith("twiga_"):
         return None
 
-    # Find the API key in database
-    db_api_key = (
+    # Get all active API keys and verify against hash
+    active_keys = (
         db.query(APIKey)
         .filter(APIKey.is_active is True)
-        .filter(APIKey.key_hash == api_key)  # This should be hashed comparison
-        .first()
+        .all()
     )
-
+    
+    db_api_key = None
+    for key in active_keys:
+        if verify_api_key(api_key, key.key_hash):
+            db_api_key = key
+            break
+    
     if not db_api_key:
         return None
 

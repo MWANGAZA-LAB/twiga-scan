@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import validator
+from pydantic import field_validator, ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -53,7 +53,13 @@ class Settings(BaseSettings):
     SENTRY_DSN: Optional[str] = None  # Set in .env for production
     PROMETHEUS_ENABLED: bool = False
 
-    @validator("CORS_ORIGINS", pre=True)
+    model_config = ConfigDict(
+        env_file=".env",
+        case_sensitive=True
+    )
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
     def assemble_cors_origins(cls, v):
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
@@ -61,17 +67,14 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
 
-    @validator("ALLOWED_FILE_TYPES", pre=True)
+    @field_validator("ALLOWED_FILE_TYPES", mode="before")
+    @classmethod
     def assemble_file_types(cls, v):
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):
             return v
         raise ValueError(v)
-
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
 
 
 # Global settings instance

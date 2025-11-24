@@ -2,14 +2,13 @@ import os
 from typing import Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.pool import StaticPool, QueuePool
 
 # Database URL from environment or default to SQLite for development
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./twiga_scan.db")
 
-# Create engine
+# Create engine with optimized connection pooling
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
         DATABASE_URL,
@@ -17,7 +16,16 @@ if DATABASE_URL.startswith("sqlite"):
         poolclass=StaticPool,
     )
 else:
-    engine = create_engine(DATABASE_URL)
+    # Production database with connection pooling
+    engine = create_engine(
+        DATABASE_URL,
+        poolclass=QueuePool,
+        pool_size=20,
+        max_overflow=30,
+        pool_pre_ping=True,
+        pool_recycle=3600,
+        echo=False
+    )
 
 # Create SessionLocal class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

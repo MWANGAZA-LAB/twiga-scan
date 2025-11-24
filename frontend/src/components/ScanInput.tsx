@@ -166,7 +166,11 @@ const ScanInput: React.FC<ScanInputProps> = ({ onScan, isLoading = false, isDark
           <div className="border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden aspect-square sm:aspect-video max-h-[70vh]">
             <CustomQrReader
               onResult={handleCameraResult}
-              onError={(err) => console.error('Camera error:', err)}
+              onError={(err) => {
+                if (process.env.NODE_ENV === 'development') {
+                  console.error('Camera error:', err);
+                }
+              }}
               className="w-full h-full object-cover"
             />
           </div>

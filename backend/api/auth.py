@@ -174,11 +174,35 @@ async def revoke_api_key(
     return {"message": "API key revoked successfully"}
 
 
-@router.post("/refresh")
+@router.post("/refresh", response_model=Token)
 async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
     """Refresh access token using refresh token"""
-    # TODO: Implement refresh token logic
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Refresh token not implemented yet",
-    )
+    from auth.jwt_handler import verify_token
+    
+    # Verify the refresh token
+    token_data = verify_token(refresh_token)
+    if not token_data:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Get user from database
+    user = db.query(User).filter(User.id == token_data.user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user"
+        )
+    
+    # Create new tokens
+    new_tokens = create_user_tokens(user.id, user.username)
+    return new_tokens
